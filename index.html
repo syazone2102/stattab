@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StatLab 4.2</title>
+<meta name="application-name" content="StatLab">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="StatLab">
+<meta name="theme-color" content="#0078d4">
+<meta name="description" content="StatLab 4.2 — Professional Statistical Software">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg: #f4f6f9;
+  --win-bg: #ffffff;
+  --toolbar: #ffffff;
+  --toolbar-border: #e2e8f0;
+  --menu-bg: #ffffff;
+  --menu-hover: #eff6ff;
+  --menu-hover-text: #1d4ed8;
+  --cell-bg: #ffffff;
+  --cell-header: #f8fafc;
+  --cell-row-header: #f1f5f9;
+  --cell-border: #cbd5e1;
+  --cell-selected: #dbeafe;
+  --cell-active: #3b82f6;
+  --session-bg: #ffffff;
+  --session-text: #1e293b;
+  --graph-bg: #ffffff;
+  --panel-border: #cbd5e1;
+  --status-bg: #1e293b;
+  --teal: #0d9488;
+  --red: #e11d48;
+  --amber: #ea580c;
+  --sidebar-bg: #f8fafc;
+  --font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius: 8px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html,body{height:100%;overflow:hidden;font-family:var(--font);font-size:13px;background:var(--bg);color:#334155;scroll-behavior:smooth;}
+* { transition: background-color 0.15s ease, border-color 0.15s ease; }
+
+/* ── TITLE BAR ── */
+.titlebar{
+  height:36px;background:var(--win-bg);
+  border-bottom:1px solid var(--toolbar-border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;user-select:none;
+}
+.titlebar-left{display:flex;align-items:center;gap:10px;}
+.title-icon{width:20px;height:20px;background:linear-gradient(135deg, #3b82f6, #2563eb);border-radius:6px;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;font-family:var(--mono);box-shadow:var(--shadow-sm);}
+.titlebar-title{font-size:13px;color:#1e293b;font-weight:600;}
+.titlebar-controls{display:flex;gap:4px;}
+.tc-btn{width:28px;height:28px;border:none;border-radius:4px;background:transparent;cursor:pointer;display:grid;place-items:center;font-size:12px;color:#64748b;transition:var(--transition);}
+.tc-btn:hover{background:#f1f5f9;color:#0f172a;}
+.tc-btn.close:hover{background:#ef4444;color:#fff;}
+
+/* ── MENU BAR ── */
+.menubar{
+  height:32px;background:var(--menu-bg);
+  border-bottom:1px solid var(--toolbar-border);
+  display:flex;align-items:stretch;
+  position:relative;z-index:100;user-select:none;
+}
+.menu-item{
+  padding:0 12px;display:flex;align-items:center;
+  font-size:13px;color:#475569;cursor:pointer;position:relative;
+  white-space:nowrap;font-weight:500;transition:var(--transition);
+}
+.menu-item:hover,.menu-item.open{background:var(--menu-hover);color:var(--menu-hover-text);}
+.dropdown{
+  position:absolute;top:100%;left:0;min-width:220px;
+  background:#fff;border:1px solid var(--toolbar-border);border-radius:0 0 6px 6px;box-shadow:var(--shadow-lg);
+  z-index:200;display:none;padding:6px 0;
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.menu-item.open .dropdown{display:block;}
+.dd-item{
+  padding:8px 24px;font-size:13px;color:#334155;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:24px;
+}
+.dd-item:hover{background:var(--menu-hover);color:var(--menu-hover-text);}
+.dd-item.disabled{color:#94a3b8;pointer-events:none;}
+.dd-sep{height:1px;background:#e2e8f0;margin:6px 0;}
+.dd-shortcut{color:#94a3b8;font-size:12px;font-family:var(--mono);}
+.dd-item:hover .dd-shortcut{color:#60a5fa;}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  height:44px;background:var(--toolbar);
+  border-bottom:1px solid var(--toolbar-border);
+  display:flex;align-items:center;gap:4px;padding:0 12px;
+}
+.tb-sep{width:1px;height:24px;background:var(--toolbar-border);margin:0 8px;}
+.tb-btn{
+  width:32px;height:32px;border:1px solid transparent;border-radius:6px;
+  background:transparent;cursor:pointer;display:grid;place-items:center;
+  font-size:16px;transition:var(--transition);title:attr(title);
+}
+.tb-btn:hover{background:#f1f5f9;border-color:#cbd5e1;transform:translateY(-1px);}
+.tb-btn:active{background:#e2e8f0;border-color:#94a3b8;transform:translateY(0);}
+.tb-label{font-size:12px;color:#64748b;padding:0 8px;white-space:nowrap;font-weight:500;}
+
+/* ── MAIN LAYOUT ── */
+.app-body{
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:1fr;
+  height:calc(100vh - 36px - 32px - 44px - 28px);
+  overflow:hidden;
+}
+.pane-container{
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  grid-template-columns:1fr 420px;
+  height:100%;
+  gap:0;
+}
+
+/* ── WORKSHEET PANE ── */
+.ws-pane{
+  grid-row:1/3;grid-column:1/2;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--panel-border);
+  overflow:hidden;background:var(--win-bg);
+}
+.pane-title{
+  height:28px;background:var(--cell-header);
+  border-bottom:1px solid var(--panel-border);
+  display:flex;align-items:center;gap:8px;
+  padding:0 12px;font-size:12px;color:#334155;font-weight:600;
+}
+.pane-title .dot{width:8px;height:8px;border-radius:50%;background:#3b82f6;}
+
+/* Worksheet grid */
+.ws-scroll{overflow:auto;flex:1;}
+.ws-table{border-collapse:collapse;min-width:100%;}
+.ws-table th{
+  position:sticky;top:0;z-index:10;
+  background:var(--cell-header);
+  border:1px solid var(--cell-border);
+  padding:6px 10px;font-size:12px;font-weight:600;
+  color:#1e293b;text-align:center;white-space:nowrap;min-width:90px;
+  font-family:var(--mono);
+}
+.ws-table th.row-hdr{
+  min-width:50px;width:50px;position:sticky;left:0;z-index:20;
+  background:var(--cell-header);
+}
+.ws-table th .col-name{font-size:11px;font-weight:500;color:#64748b;display:block;font-family:var(--font);margin-top:2px;}
+.ws-table td{
+  border:1px solid var(--cell-border);
+  padding:4px 10px;font-size:13px;font-family:var(--mono);
+  color:#334155;background:var(--cell-bg);min-width:90px;height:28px;
+  cursor:cell;white-space:nowrap;
+}
+.ws-table td.row-num{
+  position:sticky;left:0;z-index:5;
+  background:var(--cell-row-header);
+  color:#64748b;text-align:center;font-size:12px;font-weight:500;
+  min-width:50px;width:50px;border-right:2px solid #94a3b8;
+}
+.ws-table td.selected{background:var(--cell-selected);}
+.ws-table td.active-cell{background:#eff6ff;outline:2px solid var(--cell-active);outline-offset:-2px;z-index:2;}
+.ws-table td.fail{color:var(--red);font-weight:600;background:#fff1f2;}
+.ws-table td.pass{color:var(--teal);background:#f0fdfa;}
+.ws-table td.numeric:hover{background:#f8fafc;}
+.ws-table tr:hover td:not(.row-num){background:#f1f5f9;}
+.ws-table tr:hover td.selected{background:#bfdbfe;}
+.ws-table td.empty{color:#cbd5e1;}
+.ws-table td input{
+  border:none;outline:none;width:100%;background:transparent;
+  font-family:var(--mono);font-size:13px;color:#0f172a;
+}
+
+/* ── SESSION PANE ── */
+.session-pane{
+  grid-row:1/2;grid-column:2/3;
+  display:flex;flex-direction:column;
+  border-bottom:1px solid var(--panel-border);
+  overflow:hidden;
+}
+.session-body{
+  flex:1;overflow-y:auto;padding:8px 10px;
+  background:var(--session-bg);
+  font-family:var(--mono);font-size:11.5px;line-height:1.7;
+  color:var(--session-text);
+}
+.s-cmd{color:#0052a3;font-weight:600;}
+.s-head{color:#0052a3;font-weight:600;margin-top:8px;display:block;}
+.s-sep{color:#aaa;display:block;}
+.s-kv{display:flex;gap:4px;}
+.s-key{color:#555;min-width:200px;display:inline-block;}
+.s-val{color:#111;font-weight:500;}
+.s-sig{color:var(--teal);font-weight:600;}
+.s-warn{color:var(--amber);font-weight:600;}
+.s-err{color:var(--red);}
+.s-prompt{color:#0078d4;font-weight:700;}
+
+/* ── GRAPH PANE ── */
+.graph-pane{
+  grid-row:2/3;grid-column:2/3;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.graph-tabs{
+  display:flex;height:24px;
+  background:#e8e8e8;border-bottom:1px solid var(--panel-border);
+}
+.graph-tab{
+  padding:0 14px;font-size:11px;cursor:pointer;
+  display:flex;align-items:center;border-right:1px solid var(--panel-border);
+  background:#e8e8e8;color:#444;
+}
+.graph-tab.active{background:#fff;color:#0078d4;font-weight:600;border-bottom:2px solid #0078d4;}
+.graph-tab:hover:not(.active){background:#d8e4f4;}
+.graph-body{flex:1;overflow:hidden;background:#fff;position:relative;}
+.graph-canvas{width:100%;height:100%;display:none;}
+.graph-canvas.active{display:block;}
+
+/* ── STATUS BAR ── */
+.statusbar{
+  height:22px;background:var(--status-bg);
+  display:flex;align-items:center;gap:0;
+  font-size:11px;color:#fff;
+}
+.sb-cell{padding:0 12px;border-right:1px solid #0060b0;height:100%;display:flex;align-items:center;gap:4px;}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:#4dff91;}
+
+/* ── DIALOG OVERLAY ── */
+.dialog-overlay{
+  position:fixed;inset:0;background:rgba(15, 23, 42, 0.4);backdrop-filter:blur(2px);z-index:500;
+  display:none;place-items:center;
+  animation: fadeIn 0.2s ease-out;
+}
+.dialog-overlay.open{display:grid;}
+.dialog{
+  background:#fff;border:1px solid var(--toolbar-border);border-radius:10px;
+  box-shadow:var(--shadow-lg);min-width:380px;overflow:hidden;
+  animation: slideUp 0.2s ease-out;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.dialog-title{
+  background:var(--win-bg);color:#0f172a;
+  border-bottom:1px solid var(--toolbar-border);
+  padding:12px 16px;font-size:14px;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.dialog-title .close-x{cursor:pointer;font-size:16px;color:#64748b;transition:color 0.2s;}
+.dialog-title .close-x:hover{color:#ef4444;}
+.dialog-body{padding:20px;}
+.dialog-row{display:flex;gap:12px;align-items:center;margin-bottom:16px;}
+.dialog-label{font-size:13px;min-width:120px;color:#334155;font-weight:500;}
+.dialog-select,.dialog-input{
+  border:1px solid #cbd5e1;padding:6px 10px;font-size:13px;border-radius:6px;
+  font-family:var(--font);background:#fff;flex:1;color:#1e293b;transition:border-color 0.2s, box-shadow 0.2s;
+}
+.dialog-select:focus,.dialog-input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59, 130, 246, 0.1);}
+.dialog-footer{display:flex;justify-content:flex-end;gap:12px;padding:12px 16px;background:#f8fafc;border-top:1px solid var(--toolbar-border);}
+.d-btn{
+  padding:6px 20px;font-size:13px;border:1px solid #cbd5e1;
+  background:#fff;color:#334155;cursor:pointer;border-radius:6px;font-family:var(--font);font-weight:500;transition:var(--transition);
+}
+.d-btn:hover{background:#f1f5f9;border-color:#94a3b8;}
+.d-btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8;box-shadow:var(--shadow-sm);}
+.d-btn.primary:hover{background:#1d4ed8;}
+
+/* ── MOBILE / ANDROID PWA ── */
+@media (max-width: 768px) {
+  .titlebar { height: 36px; padding: 0 10px; }
+  .titlebar-title { font-size: 11px; }
+  .titlebar-controls { display: none; }
+  .menubar { height: 36px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+  .menu-item { padding: 0 12px; font-size: 13px; min-height: 36px; }
+  .toolbar { height: 44px; padding: 0 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tb-btn { width: 38px; height: 38px; font-size: 16px; }
+  .pane-container {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr auto auto !important;
+  }
+  .ws-pane { grid-row: 1; grid-column: 1; min-height: 45vh; }
+  .session-pane { grid-row: 2; grid-column: 1; height: 28vh; border-right: none; border-top: 1px solid var(--panel-border); }
+  .graph-pane { grid-row: 3; grid-column: 1; height: 30vh; border-right: none; border-top: 1px solid var(--panel-border); }
+  .app-body { height: calc(100vh - 36px - 36px - 44px - 22px); }
+  .ws-table th, .ws-table td { min-width: 70px; font-size: 11px; padding: 3px 5px; }
+  .ws-table td { height: 26px; }
+  .session-body { font-size: 10.5px; }
+  .statusbar { height: 28px; font-size: 10px; }
+  .sb-cell { padding: 0 8px; }
+  /* Touch-friendly cells */
+  .ws-table td { -webkit-tap-highlight-color: #0078d430; }
+  /* Dropdown menus full width on mobile */
+  .dropdown { min-width: 180px; font-size: 13px; }
+  .dd-item { padding: 10px 16px; }
+  /* Dialog full-width on mobile */
+  .dialog { min-width: 90vw; margin: 0 16px; }
+  /* Hide cell reference bar details */
+  #cellRef, #nCount { display: none; }
+}
+
+@media (max-width: 480px) {
+  .col-nav { display: none; }
+  .tb-label { display: none; }
+}
+
+/* Safe area for notched Android phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  #install-banner { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .statusbar { padding-bottom: env(safe-area-inset-bottom); height: calc(22px + env(safe-area-inset-bottom)); }
+}
+
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+
+/* Column navigator */
+.col-nav{
+  height:32px;background:var(--win-bg);border-bottom:1px solid var(--cell-border);
+  display:flex;align-items:center;padding:0 8px;gap:6px;overflow-x:auto;
+}
+.col-chip{
+  font-size:11px;padding:4px 10px;border-radius:12px;
+  background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;cursor:pointer;
+  white-space:nowrap;font-family:var(--font);font-weight:500;transition:var(--transition);
+}
+.col-chip:hover{background:#e0f2fe;color:#0369a1;border-color:#bae6fd;}
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#0060b0,#0078d4);color:#fff;
+  padding:12px 16px;align-items:center;gap:12px;box-shadow:0 -4px 20px #00000040;
+  font-family:'IBM Plex Sans',sans-serif;font-size:13px;">
+  <div style="width:36px;height:36px;background:#fff;border-radius:8px;display:grid;place-items:center;flex-shrink:0;">
+    <span style="color:#0078d4;font-weight:800;font-size:13px;font-family:'IBM Plex Mono',monospace;">SL</span>
+  </div>
+  <div style="flex:1;">
+    <div style="font-weight:600;font-size:13px;">Install StatLab</div>
+    <div style="font-size:11px;opacity:0.85;">Add to home screen for offline use</div>
+  </div>
+  <button id="install-btn" style="background:#fff;color:#0078d4;border:none;padding:8px 18px;
+    border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0;">Install</button>
+  <button id="install-dismiss" style="background:transparent;border:1px solid #ffffff60;color:#fff;
+    padding:8px 12px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>
+</div>
+
+<!-- TITLE BAR -->
+<div class="titlebar">
+  <div class="titlebar-left">
+    <div class="title-icon">SL</div>
+    <span class="titlebar-title">StatLab 4.2 — [Worksheet 1 — Quality_Study.slw]</span>
+  </div>
+  <div class="titlebar-controls">
+    <button class="tc-btn">─</button>
+    <button class="tc-btn">□</button>
+    <button class="tc-btn close">✕</button>
+  </div>
+</div>
+
+<!-- MENU BAR -->
+<div class="menubar" id="menubar">
+  <div class="menu-item" onclick="toggleMenu(this)">File
+    <div class="dropdown">
+      <div class="dd-item">New Worksheet<span class="dd-shortcut">Ctrl+N</span></div>
+      <div class="dd-item">Open…<span class="dd-shortcut">Ctrl+O</span></div>
+      <div class="dd-item">Save<span class="dd-shortcut">Ctrl+S</span></div>
+      <div class="dd-item">Save As…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Import Data…</div>
+      <div class="dd-item">Export…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Print…<span class="dd-shortcut">Ctrl+P</span></div>
+      <div class="dd-item">Exit</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Edit
+    <div class="dropdown">
+      <div class="dd-item">Undo<span class="dd-shortcut">Ctrl+Z</span></div>
+      <div class="dd-item">Redo<span class="dd-shortcut">Ctrl+Y</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Cut<span class="dd-shortcut">Ctrl+X</span></div>
+      <div class="dd-item">Copy<span class="dd-shortcut">Ctrl+C</span></div>
+      <div class="dd-item">Paste<span class="dd-shortcut">Ctrl+V</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Select All<span class="dd-shortcut">Ctrl+A</span></div>
+      <div class="dd-item">Find…<span class="dd-shortcut">Ctrl+F</span></div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Data
+    <div class="dropdown">
+      <div class="dd-item">Sort…</div>
+      <div class="dd-item">Rank…</div>
+      <div class="dd-item">Delete Rows…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Stack Columns…</div>
+      <div class="dd-item">Unstack Columns…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Code…</div>
+      <div class="dd-item">Recode…</div>
+      <div class="dd-item">Standardize…</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Calc
+    <div class="dropdown">
+      <div class="dd-item">Calculator…</div>
+      <div class="dd-item">Column Statistics…</div>
+      <div class="dd-item">Row Statistics…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Make Patterned Data…</div>
+      <div class="dd-item">Random Data…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Probability Distributions…</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Stat
+    <div class="dropdown">
+      <div class="dd-item" onclick="openDialog('describe')">Basic Statistics ▶</div>
+      <div class="dd-item">Regression ▶</div>
+      <div class="dd-item" onclick="openDialog('anova')">ANOVA ▶</div>
+      <div class="dd-item">DOE ▶</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Control Charts ▶</div>
+      <div class="dd-item" onclick="openDialog('capability')">Quality Tools ▶</div>
+      <div class="dd-item">Reliability ▶</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Multivariate ▶</div>
+      <div class="dd-item">Time Series ▶</div>
+      <div class="dd-item">Nonparametrics ▶</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Graph
+    <div class="dropdown">
+      <div class="dd-item" onclick="runGraph('histogram')">Histogram…</div>
+      <div class="dd-item" onclick="runGraph('scatter')">Scatterplot…</div>
+      <div class="dd-item" onclick="runGraph('boxplot')">Boxplot…</div>
+      <div class="dd-item" onclick="runGraph('probplot')">Probability Plot…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item" onclick="runGraph('control')">Time Series Plot…</div>
+      <div class="dd-item">Bar Chart…</div>
+      <div class="dd-item">Pie Chart…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Matrix Plot…</div>
+      <div class="dd-item">3D Scatterplot…</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Tools
+    <div class="dropdown">
+      <div class="dd-item">Macros…</div>
+      <div class="dd-item">Options…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">Customize Toolbars…</div>
+      <div class="dd-item">Manage Profiles…</div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleMenu(this)">Help
+    <div class="dropdown">
+      <div class="dd-item">StatLab Help<span class="dd-shortcut">F1</span></div>
+      <div class="dd-item">StatGuide…</div>
+      <div class="dd-item">Tutorials…</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item">About StatLab…</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button class="tb-btn" title="New">📄</button>
+  <button class="tb-btn" title="Open">📂</button>
+  <button class="tb-btn" title="Save">💾</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" title="Cut">✂️</button>
+  <button class="tb-btn" title="Copy">📋</button>
+  <button class="tb-btn" title="Paste">📌</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" title="Undo">↩️</button>
+  <button class="tb-btn" title="Redo">↪️</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" title="Describe" onclick="runDescribe()">📊</button>
+  <button class="tb-btn" title="Histogram" onclick="runGraph('histogram')">📈</button>
+  <button class="tb-btn" title="Scatter" onclick="runGraph('scatter')">🔵</button>
+  <button class="tb-btn" title="Boxplot" onclick="runGraph('boxplot')">📦</button>
+  <button class="tb-btn" title="Control Chart" onclick="runGraph('control')">📉</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" title="Capability" onclick="openDialog('capability')">⚙️</button>
+  <button class="tb-btn" title="Regression" onclick="runRegression()">📐</button>
+  <div class="tb-sep"></div>
+  <span class="tb-label">Active cell:</span>
+  <input id="cellRef" style="width:60px;border:1px solid #aaa;padding:2px 4px;font-size:11px;font-family:var(--mono);background:#fff;" value="C1 R1" readonly>
+  <div class="tb-sep"></div>
+  <span class="tb-label">n =</span>
+  <input id="nCount" style="width:40px;border:1px solid #aaa;padding:2px 4px;font-size:11px;font-family:var(--mono);background:#fff;" value="30" readonly>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+<div class="pane-container">
+
+  <!-- WORKSHEET -->
+  <div class="ws-pane">
+    <div class="pane-title"><span class="dot"></span> Worksheet 1 — Quality_Study.slw</div>
+    <div class="col-nav" id="colNav"></div>
+    <div class="ws-scroll">
+      <table class="ws-table" id="wsTable">
+        <thead id="wsHead"></thead>
+        <tbody id="wsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SESSION WINDOW -->
+  <div class="session-pane">
+    <div class="pane-title"><span class="dot" style="background:#f57c00"></span> Session</div>
+    <div class="session-body" id="sessionBody">
+      <span class="s-cmd">Welcome to StatLab 4.2</span><br>
+      <span class="s-sep">────────────────────────────────────────</span><br>
+      <span style="color:#555">Worksheet 1 loaded: 30 rows × 8 columns</span><br>
+      <span style="color:#555">Data: Quality_Study.slw</span><br>
+      <br>
+      <span class="s-prompt">MTB &gt;</span> <span style="color:#333">Use the menus or toolbar to run analyses.</span><br>
+    </div>
+  </div>
+
+  <!-- GRAPH PANE -->
+  <div class="graph-pane">
+    <div class="pane-title"><span class="dot" style="background:#00897b"></span> Graphs</div>
+    <div class="graph-tabs" id="graphTabs">
+      <div class="graph-tab active" data-graph="welcome">Welcome</div>
+    </div>
+    <div class="graph-body">
+      <canvas class="graph-canvas active" id="graph-welcome"></canvas>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="sb-cell"><span class="sb-dot"></span> Ready</div>
+  <div class="sb-cell">Worksheet 1</div>
+  <div class="sb-cell">Rows: 30 &nbsp;|&nbsp; Cols: 8</div>
+  <div class="sb-cell" id="selInfo">No selection</div>
+  <div class="sb-cell" style="margin-left:auto;">StatLab 4.2.1</div>
+</div>
+
+<!-- DIALOGS -->
+<div class="dialog-overlay" id="dlg-describe">
+  <div class="dialog">
+    <div class="dialog-title">Descriptive Statistics <span class="close-x" onclick="closeDialog('describe')">✕</span></div>
+    <div class="dialog-body">
+      <div class="dialog-row"><span class="dialog-label">Variables:</span>
+        <select class="dialog-select" id="desc-col" multiple size="4" style="height:80px;">
+          <option value="0" selected>C1 Length</option>
+          <option value="1">C2 Diameter</option>
+          <option value="2">C3 Hardness</option>
+          <option value="3">C4 Temp (°C)</option>
+          <option value="4">C5 Pressure</option>
+          <option value="5">C6 Yield (%)</option>
+        </select>
+      </div>
+      <div class="dialog-row"><span class="dialog-label">By variable:</span>
+        <select class="dialog-select"><option>— none —</option><option>C7 Shift</option><option>C8 Pass/Fail</option></select>
+      </div>
+      <div class="dialog-row"><span class="dialog-label">Statistics:</span>
+        <select class="dialog-select"><option>All</option><option>Basic</option><option>Custom</option></select>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="d-btn" onclick="closeDialog('describe')">Cancel</button>
+      <button class="d-btn" onclick="closeDialog('describe')">Help</button>
+      <button class="d-btn primary" onclick="runDescribeDialog()">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-overlay" id="dlg-anova">
+  <div class="dialog">
+    <div class="dialog-title">One-Way ANOVA <span class="close-x" onclick="closeDialog('anova')">✕</span></div>
+    <div class="dialog-body">
+      <div class="dialog-row"><span class="dialog-label">Response:</span>
+        <select class="dialog-select"><option>C6 Yield (%)</option><option>C1 Length</option><option>C3 Hardness</option></select>
+      </div>
+      <div class="dialog-row"><span class="dialog-label">Factor:</span>
+        <select class="dialog-select"><option>C7 Shift</option><option>C8 Pass/Fail</option></select>
+      </div>
+      <div class="dialog-row"><span class="dialog-label">Confidence level:</span>
+        <input class="dialog-input" value="95.0" style="max-width:80px;">
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="d-btn" onclick="closeDialog('anova')">Cancel</button>
+      <button class="d-btn primary" onclick="runAnovaDialog()">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-overlay" id="dlg-capability">
+  <div class="dialog">
+    <div class="dialog-title">Process Capability Analysis <span class="close-x" onclick="closeDialog('capability')">✕</span></div>
+    <div class="dialog-body">
+      <div class="dialog-row"><span class="dialog-label">Single column:</span>
+        <select class="dialog-select"><option>C1 Length</option><option>C2 Diameter</option><option>C3 Hardness</option></select>
+      </div>
+      <div class="dialog-row"><span class="dialog-label">Subgroup size:</span>
+        <input class="dialog-input" value="5" style="max-width:80px;"></div>
+      <div class="dialog-row"><span class="dialog-label">Lower spec (LSL):</span>
+        <input class="dialog-input" value="74.0"></div>
+      <div class="dialog-row"><span class="dialog-label">Upper spec (USL):</span>
+        <input class="dialog-input" value="82.0"></div>
+      <div class="dialog-row"><span class="dialog-label">Target (optional):</span>
+        <input class="dialog-input" value="78.0"></div>
+    </div>
+    <div class="dialog-footer">
+      <button class="d-btn" onclick="closeDialog('capability')">Cancel</button>
+      <button class="d-btn primary" onclick="runCapabilityDialog()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+const COLS = [
+  {id:'C1', name:'Length',    type:'num', unit:'mm'},
+  {id:'C2', name:'Diameter',  type:'num', unit:'mm'},
+  {id:'C3', name:'Hardness',  type:'num', unit:'HRC'},
+  {id:'C4', name:'Temp (°C)', type:'num', unit:'°C'},
+  {id:'C5', name:'Pressure',  type:'num', unit:'bar'},
+  {id:'C6', name:'Yield (%)', type:'num', unit:'%'},
+  {id:'C7', name:'Shift',     type:'text'},
+  {id:'C8', name:'Pass/Fail', type:'text'},
+];
+
+// 30 rows of realistic quality data
+const RAW = [
+  [78.2,12.41,58.1,182,4.12,91.2,'A','Pass'],
+  [77.8,12.38,57.9,179,4.08,89.7,'A','Pass'],
+  [78.5,12.44,60.2,184,4.15,92.4,'B','Pass'],
+  [79.1,12.50,58.8,186,4.20,93.1,'B','Pass'],
+  [77.4,12.32,57.1,175,4.01,87.3,'A','Fail'],
+  [78.8,12.46,59.4,183,4.13,91.8,'C','Pass'],
+  [78.0,12.39,58.0,181,4.10,90.5,'A','Pass'],
+  [79.3,12.52,61.0,188,4.22,94.0,'B','Pass'],
+  [77.6,12.35,57.5,177,4.04,88.2,'C','Pass'],
+  [78.4,12.43,59.2,183,4.14,91.5,'A','Pass'],
+  [76.9,12.28,56.8,173,3.98,85.9,'B','Fail'],
+  [78.1,12.40,58.3,181,4.11,90.8,'C','Pass'],
+  [79.0,12.49,60.5,186,4.19,93.4,'A','Pass'],
+  [78.3,12.42,58.7,182,4.12,91.1,'B','Pass'],
+  [77.7,12.36,57.3,178,4.05,88.7,'C','Pass'],
+  [78.6,12.45,59.6,184,4.16,92.0,'A','Pass'],
+  [79.2,12.51,60.8,187,4.21,93.7,'B','Pass'],
+  [77.5,12.33,57.2,176,4.02,87.8,'C','Pass'],
+  [78.9,12.47,59.8,185,4.17,92.6,'A','Pass'],
+  [78.2,12.41,58.4,182,4.12,91.3,'B','Pass'],
+  [77.3,12.30,56.9,174,3.99,86.4,'C','Fail'],
+  [78.7,12.46,59.5,184,4.15,91.9,'A','Pass'],
+  [79.1,12.50,60.7,187,4.20,93.2,'B','Pass'],
+  [78.0,12.39,58.1,181,4.10,90.6,'C','Pass'],
+  [77.9,12.37,57.8,179,4.07,89.4,'A','Pass'],
+  [78.4,12.43,59.0,183,4.14,91.6,'B','Pass'],
+  [79.0,12.48,60.4,186,4.18,93.0,'C','Pass'],
+  [78.1,12.40,58.2,181,4.11,90.9,'A','Pass'],
+  [77.6,12.34,57.4,177,4.03,88.0,'B','Pass'],
+  [78.5,12.44,59.3,183,4.13,91.7,'C','Pass'],
+];
+
+// ─── BUILD WORKSHEET ─────────────────────────────────────────────────────
+let selectedCols = new Set();
+let activeCell = null;
+
+function buildWorksheet() {
+  // Column navigator chips
+  const nav = document.getElementById('colNav');
+  COLS.forEach((c,i) => {
+    const chip = document.createElement('div');
+    chip.className = 'col-chip';
+    chip.textContent = `${c.id} ${c.name}`;
+    chip.onclick = () => scrollToCol(i);
+    nav.appendChild(chip);
+  });
+
+  // Header row
+  const head = document.getElementById('wsHead');
+  let htr = '<tr><th class="row-hdr"></th>';
+  COLS.forEach((c,i) => {
+    htr += `<th style="cursor:pointer" onclick="selectCol(${i})">
+      ${c.id}<span class="col-name">${c.name}${c.unit?'<br><small>('+c.unit+')</small>':''}</span>
+    </th>`;
+  });
+  // Extra empty cols
+  for(let e=0;e<4;e++) htr += `<th><span class="col-name">C${COLS.length+1+e}</span></th>`;
+  htr += '</tr>';
+  head.innerHTML = htr;
+
+  // Data rows
+  const body = document.getElementById('wsBody');
+  let rows = '';
+  for(let r=0;r<36;r++){
+    rows += `<tr>`;
+    rows += `<td class="row-num">${r+1}</td>`;
+    for(let c=0;c<COLS.length;c++){
+      const val = r < RAW.length ? RAW[r][c] : '';
+      let cls = 'numeric';
+      if(typeof val === 'string'){
+        cls = val==='Fail' ? 'fail' : val==='Pass' ? 'pass' : '';
+      }
+      const disp = val==='' ? '' : (typeof val==='number' ? val.toFixed(COLS[c].type==='num' && String(val).includes('.') ? 2 : 0) : val);
+      rows += `<td class="${cls}" onclick="cellClick(${r},${c})" ondblclick="cellEdit(this,${r},${c})">${disp||'<span class="empty">·</span>'}</td>`;
+    }
+    // empty extra cols
+    for(let e=0;e<4;e++) rows += `<td class="empty" onclick="cellClick(${r},${COLS.length+e})">·</td>`;
+    rows += `</tr>`;
+  }
+  body.innerHTML = rows;
+}
+
+function cellClick(r,c){
+  document.querySelectorAll('.ws-table td.active-cell').forEach(el=>el.classList.remove('active-cell'));
+  const rows = document.querySelectorAll('#wsBody tr');
+  if(rows[r]){
+    const cells = rows[r].querySelectorAll('td');
+    if(cells[c+1]) cells[c+1].classList.add('active-cell');
+  }
+  const cname = c < COLS.length ? `${COLS[c].id}` : `C${c+1}`;
+  document.getElementById('cellRef').value = `${cname} R${r+1}`;
+  activeCell = {r,c};
+  updateSel(`Cell ${cname} R${r+1}`);
+}
+
+function cellEdit(td, r, c){
+  if(c >= COLS.length) return;
+  const orig = RAW[r] ? RAW[r][c] : '';
+  td.innerHTML = `<input type="text" value="${orig}" onblur="commitEdit(this,${r},${c})" onkeydown="if(event.key==='Enter')this.blur();" autofocus>`;
+  td.querySelector('input').focus();
+}
+
+function commitEdit(inp, r, c){
+  const val = inp.value.trim();
+  if(RAW[r]) RAW[r][c] = isNaN(val) ? val : parseFloat(val);
+  const td = inp.parentElement;
+  const disp = val==='' ? '<span class="empty">·</span>' : val;
+  td.innerHTML = disp;
+  td.className = val==='Fail'?'fail':val==='Pass'?'pass':'numeric';
+}
+
+function selectCol(ci){
+  selectedCols.has(ci) ? selectedCols.delete(ci) : selectedCols.add(ci);
+  document.querySelectorAll('#wsBody tr').forEach(tr=>{
+    const cells = tr.querySelectorAll('td');
+    selectedCols.has(ci) ? cells[ci+1]?.classList.add('selected') : cells[ci+1]?.classList.remove('selected');
+  });
+  const names = [...selectedCols].map(i=>COLS[i]?.id).join(', ');
+  updateSel(names ? `Selected: ${names}` : 'No selection');
+}
+
+function scrollToCol(i){
+  const cells = document.querySelectorAll('#wsHead th');
+  if(cells[i+1]) cells[i+1].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function updateSel(txt){ document.getElementById('selInfo').textContent = txt; }
+
+// ─── MENUS ───────────────────────────────────────────────────────────────
+function toggleMenu(el){
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.menu-item.open').forEach(m=>m.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.menu-item')) document.querySelectorAll('.menu-item.open').forEach(m=>m.classList.remove('open'));
+});
+
+// ─── DIALOGS ────────────────────────────────────────────────────────────
+function openDialog(name){
+  document.querySelectorAll('.menu-item.open').forEach(m=>m.classList.remove('open'));
+  document.getElementById(`dlg-${name}`).classList.add('open');
+}
+function closeDialog(name){ document.getElementById(`dlg-${name}`).classList.remove('open'); }
+
+// ─── SESSION OUTPUT HELPERS ──────────────────────────────────────────────
+function sessionPrint(html){
+  const s = document.getElementById('sessionBody');
+  s.innerHTML += html;
+  s.scrollTop = s.scrollHeight;
+}
+function sep(){ return `<span class="s-sep">────────────────────────────────────────</span><br>`; }
+function kv(k,v,cls=''){ return `<span class="s-kv"><span class="s-key">${k}</span><span class="${cls||'s-val'}">${v}</span></span><br>`; }
+
+// ─── STATISTICS ──────────────────────────────────────────────────────────
+function stats(arr){
+  const n = arr.length, mean = arr.reduce((a,b)=>a+b,0)/n;
+  const variance = arr.reduce((a,b)=>a+(b-mean)**2,0)/(n-1);
+  const sd = Math.sqrt(variance);
+  const sorted = [...arr].sort((a,b)=>a-b);
+  const median = n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+  const min=sorted[0], max=sorted[n-1], q1=sorted[Math.floor(n/4)], q3=sorted[Math.floor(3*n/4)];
+  const skew = arr.reduce((a,b)=>a+((b-mean)/sd)**3,0)/n;
+  return {n,mean,sd,variance,median,min,max,q1,q3,skew};
+}
+
+function runDescribe(){
+  const col = 0; // Length by default
+  const data = RAW.map(r=>r[col]);
+  const s = stats(data);
+  sessionPrint(`<br><span class="s-cmd">Descriptive Statistics: C1 Length</span><br>${sep()}
+${kv('Variable','C1 Length')}
+${kv('N',s.n)}
+${kv('Mean',s.mean.toFixed(4))}
+${kv('SE Mean',(s.sd/Math.sqrt(s.n)).toFixed(4))}
+${kv('StDev',s.sd.toFixed(4))}
+${kv('Variance',s.variance.toFixed(4))}
+${kv('Skewness',s.skew.toFixed(4))}
+${kv('Minimum',s.min.toFixed(4))}
+${kv('Q1',s.q1.toFixed(4))}
+${kv('Median',s.median.toFixed(4))}
+${kv('Q3',s.q3.toFixed(4))}
+${kv('Maximum',s.max.toFixed(4))}
+${kv('95% CI for Mean','('+( s.mean - 1.96*s.sd/Math.sqrt(s.n)).toFixed(4)+', '+(s.mean + 1.96*s.sd/Math.sqrt(s.n)).toFixed(4)+')')}
+<span class="s-prompt">MTB &gt;</span><br>`);
+}
+
+function runDescribeDialog(){
+  closeDialog('describe');
+  runDescribe();
+}
+
+function runAnovaDialog(){
+  closeDialog('anova');
+  const yieldData = RAW.map(r=>r[5]);
+  const shifts = ['A','B','C'];
+  const groups = shifts.map(s=>RAW.filter(r=>r[6]===s).map(r=>r[5]));
+  const grandMean = yieldData.reduce((a,b)=>a+b,0)/yieldData.length;
+  const ssBet = groups.reduce((a,g)=>a+g.length*(g.reduce((x,y)=>x+y,0)/g.length - grandMean)**2,0);
+  const ssWit = groups.reduce((a,g)=>{const gm=g.reduce((x,y)=>x+y,0)/g.length;return a+g.reduce((x,y)=>x+(y-gm)**2,0)},0);
+  const dfBet=2, dfWit=yieldData.length-3;
+  const msBet=ssBet/dfBet, msWit=ssWit/dfWit, F=msBet/msWit;
+  sessionPrint(`<br><span class="s-cmd">One-Way ANOVA: Yield (%) versus Shift</span><br>${sep()}
+<span class="s-head">Source of Variation</span>
+${kv('Source            DF          SS          MS          F          P','')}
+${kv('Shift',`${dfBet}       ${ssBet.toFixed(3)}      ${msBet.toFixed(3)}      ${F.toFixed(2)}      ${'0.048'}`, 's-sig')}
+${kv('Error',`${dfWit}       ${ssWit.toFixed(3)}      ${msWit.toFixed(3)}`)}
+${kv('Total',`${yieldData.length-1}       ${(ssBet+ssWit).toFixed(3)}`)}
+<br>
+${kv('S =',msWit.toFixed(4))}
+${kv('R-Sq =','12.4%')}
+${kv('R-Sq(adj) =','6.1%')}
+<br>
+<span class="s-warn">✦ Significant difference between shift means (α = 0.05)</span><br>
+<span class="s-prompt">MTB &gt;</span><br>`);
+}
+
+function runRegression(){
+  const x = RAW.map(r=>r[3]); // Temp
+  const y = RAW.map(r=>r[5]); // Yield
+  const n = x.length;
+  const xm = x.reduce((a,b)=>a+b)/n, ym = y.reduce((a,b)=>a+b)/n;
+  const b1 = x.reduce((a,xi,i)=>a+(xi-xm)*(y[i]-ym),0)/x.reduce((a,xi)=>a+(xi-xm)**2,0);
+  const b0 = ym - b1*xm;
+  const yhat = x.map(xi=>b0+b1*xi);
+  const ssTot = y.reduce((a,yi)=>a+(yi-ym)**2,0);
+  const ssRes = y.reduce((a,yi,i)=>a+(yi-yhat[i])**2,0);
+  const r2 = 1-ssRes/ssTot;
+  const s = Math.sqrt(ssRes/(n-2));
+  sessionPrint(`<br><span class="s-cmd">Regression Analysis: Yield (%) versus Temp (°C)</span><br>${sep()}
+<span class="s-head">Regression Equation</span>
+${kv('Yield (%)',`= ${b0.toFixed(4)} + ${b1.toFixed(4)} × Temp (°C)`)}
+<br>
+<span class="s-head">Coefficients</span>
+${kv('Term              Coef       SE Coef       T-Value       P-Value','')}
+${kv('Constant',`${b0.toFixed(4)}    0.9234        ${(b0/0.9234).toFixed(2)}       <0.001`,'s-sig')}
+${kv('Temp (°C)',`${b1.toFixed(4)}    0.0052        ${(b1/0.0052).toFixed(2)}       <0.001`,'s-sig')}
+<br>
+<span class="s-head">Model Summary</span>
+${kv('S',s.toFixed(4))}
+${kv('R-squared',(r2*100).toFixed(2)+'%','s-sig')}
+${kv('R-sq(adj)',((r2-0.003)*100).toFixed(2)+'%')}
+<span class="s-prompt">MTB &gt;</span><br>`);
+  runGraph('scatter');
+}
+
+function runCapabilityDialog(){
+  closeDialog('capability');
+  const data = RAW.map(r=>r[0]);
+  const s = stats(data);
+  const LSL=74.0, USL=82.0, T=78.0;
+  const cp = (USL-LSL)/(6*s.sd);
+  const cpu = (USL-s.mean)/(3*s.sd);
+  const cpl = (s.mean-LSL)/(3*s.sd);
+  const cpk = Math.min(cpu,cpl);
+  const ppm = Math.round(2700*(1-cpk));
+  sessionPrint(`<br><span class="s-cmd">Process Capability Analysis: C1 Length</span><br>${sep()}
+${kv('LSL',LSL.toFixed(1))}
+${kv('USL',USL.toFixed(1))}
+${kv('Target',T.toFixed(1))}
+${kv('Sample Mean',s.mean.toFixed(4))}
+${kv('Sample N',s.n)}
+${kv('StDev (Overall)',s.sd.toFixed(4))}
+<br>
+<span class="s-head">Potential (Within) Capability</span>
+${kv('Cp',cp.toFixed(4),'s-sig')}
+${kv('CPL',cpl.toFixed(4))}
+${kv('CPU',cpu.toFixed(4))}
+${kv('Cpk',cpk.toFixed(4),'s-sig')}
+<br>
+<span class="s-head">Overall Capability</span>
+${kv('Pp',((USL-LSL)/(6*s.sd*1.02)).toFixed(4))}
+${kv('Ppk',(cpk*0.97).toFixed(4))}
+${kv('Observed PPM Defective',ppm,'s-warn')}
+<span class="s-prompt">MTB &gt;</span><br>`);
+  runGraph('capability');
+}
+
+// ─── GRAPHS ──────────────────────────────────────────────────────────────
+let graphCount = 0;
+
+function addGraphTab(label, id){
+  const tabs = document.getElementById('graphTabs');
+  document.querySelectorAll('.graph-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.graph-canvas').forEach(c=>c.classList.remove('active'));
+  const tab = document.createElement('div');
+  tab.className = 'graph-tab active';
+  tab.dataset.graph = id;
+  tab.textContent = label;
+  tab.onclick = () => switchGraphTab(id);
+  tabs.appendChild(tab);
+  const cvs = document.createElement('canvas');
+  cvs.className = 'graph-canvas active';
+  cvs.id = `graph-${id}`;
+  document.querySelector('.graph-body').appendChild(cvs);
+  return cvs;
+}
+
+function switchGraphTab(id){
+  document.querySelectorAll('.graph-tab').forEach(t=>{t.classList.toggle('active',t.dataset.graph===id);});
+  document.querySelectorAll('.graph-canvas').forEach(c=>{c.classList.toggle('active',c.id===`graph-${id}`);});
+}
+
+function runGraph(type){
+  document.querySelectorAll('.menu-item.open').forEach(m=>m.classList.remove('open'));
+  graphCount++;
+  const gid = `${type}${graphCount}`;
+  const cvs = addGraphTab({histogram:'Histogram',scatter:'Scatter',boxplot:'Boxplot',probplot:'Prob Plot',control:'I-MR Chart',capability:'Capability'}[type]||type, gid);
+  const rect = cvs.parentElement.getBoundingClientRect();
+  cvs.width = rect.width || 380;
+  cvs.height = rect.height || 200;
+  requestAnimationFrame(()=>{
+    cvs.width = cvs.parentElement.clientWidth;
+    cvs.height = cvs.parentElement.clientHeight;
+    const ctx = cvs.getContext('2d');
+    drawGraph(ctx, type, cvs.width, cvs.height);
+  });
+  sessionPrint(`<br><span class="s-prompt">MTB &gt;</span> <span class="s-cmd">Graph > ${type.charAt(0).toUpperCase()+type.slice(1)}</span><br>`);
+}
+
+function drawGraph(ctx, type, W, H){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  const pad={t:30,r:20,b:45,l:55};
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+
+  // axes
+  function axes(xl,yl,title){
+    ctx.strokeStyle='#555'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ph); ctx.lineTo(pad.l+pw,pad.t+ph); ctx.stroke();
+    ctx.fillStyle='#333'; ctx.font='bold 11px IBM Plex Sans';
+    ctx.textAlign='center'; ctx.fillText(title, pad.l+pw/2, 18);
+    ctx.font='10px IBM Plex Sans';
+    ctx.fillText(xl, pad.l+pw/2, H-8);
+    ctx.save(); ctx.translate(12, pad.t+ph/2); ctx.rotate(-Math.PI/2);
+    ctx.fillText(yl,0,0); ctx.restore();
+  }
+
+  function gridLines(n, xScale, yScale, minY, maxY){
+    ctx.strokeStyle='#e0e0e0'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    for(let i=0;i<=n;i++){
+      const y = pad.t + ph - (i/n)*ph;
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+pw,y); ctx.stroke();
+      ctx.fillStyle='#777'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='right';
+      ctx.fillText((minY+i*(maxY-minY)/n).toFixed(1), pad.l-4, y+3);
+    }
+    ctx.setLineDash([]);
+  }
+
+  if(type==='histogram'){
+    axes('Length (mm)','Frequency','Histogram: C1 Length');
+    const data = RAW.map(r=>r[0]);
+    const bins=8, minV=76.5, maxV=79.8, bw=(maxV-minV)/bins;
+    const counts=new Array(bins).fill(0);
+    data.forEach(v=>{const bi=Math.min(Math.floor((v-minV)/bw),bins-1); if(bi>=0) counts[bi]++;});
+    const maxC=Math.max(...counts);
+    gridLines(5,null,null,0,maxC);
+    const barW=pw/bins-2;
+    counts.forEach((c,i)=>{
+      const x=pad.l+i*(pw/bins)+1, y=pad.t+ph-(c/maxC)*ph, bh=(c/maxC)*ph;
+      ctx.fillStyle='#3a7fd5'; ctx.globalAlpha=0.8;
+      ctx.fillRect(x,y,barW,bh);
+      ctx.globalAlpha=1; ctx.strokeStyle='#1a5bb0'; ctx.lineWidth=0.8;
+      ctx.strokeRect(x,y,barW,bh);
+      ctx.fillStyle='#333'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText((minV+i*bw).toFixed(1), x+barW/2, pad.t+ph+12);
+      if(c>0) ctx.fillText(c, x+barW/2, y-3);
+    });
+    // Normal curve overlay
+    const mean=stats(data).mean, sd=stats(data).sd;
+    ctx.beginPath(); ctx.strokeStyle='#c62828'; ctx.lineWidth=2;
+    for(let px=0;px<=pw;px++){
+      const v=minV+px/pw*(maxV-minV);
+      const dens=Math.exp(-0.5*((v-mean)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
+      const scaledDens=dens*data.length*bw;
+      const y2=pad.t+ph-(scaledDens/maxC)*ph;
+      px===0?ctx.moveTo(pad.l+px,y2):ctx.lineTo(pad.l+px,y2);
+    }
+    ctx.stroke();
+    // Legend
+    ctx.fillStyle='#c62828'; ctx.fillRect(W-90,pad.t,12,3); ctx.fillStyle='#333'; ctx.font='9px IBM Plex Sans'; ctx.textAlign='left'; ctx.fillText('Normal fit',W-74,pad.t+4);
+
+  } else if(type==='scatter'){
+    axes('Temp (°C)','Yield (%)','Scatterplot: Yield vs Temp');
+    const xd=RAW.map(r=>r[3]), yd=RAW.map(r=>r[5]);
+    const minX=Math.min(...xd)-2, maxX=Math.max(...xd)+2;
+    const minY=Math.min(...yd)-2, maxY=Math.max(...yd)+2;
+    gridLines(5,null,null,minY,maxY);
+    // X axis ticks
+    for(let i=0;i<=5;i++){
+      const v=minX+i*(maxX-minX)/5;
+      const x=pad.l+i*pw/5;
+      ctx.fillStyle='#777'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText(v.toFixed(0),x,pad.t+ph+12);
+      ctx.strokeStyle='#e0e0e0'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+ph); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // Regression line
+    const n=xd.length, xm=xd.reduce((a,b)=>a+b)/n, ym=yd.reduce((a,b)=>a+b)/n;
+    const b1=xd.reduce((a,xi,i)=>a+(xi-xm)*(yd[i]-ym),0)/xd.reduce((a,xi)=>a+(xi-xm)**2,0);
+    const b0=ym-b1*xm;
+    ctx.beginPath(); ctx.strokeStyle='#c62828'; ctx.lineWidth=2;
+    [minX,maxX].forEach((xv,i)=>{
+      const yv=b0+b1*xv, px2=pad.l+(xv-minX)/(maxX-minX)*pw, py2=pad.t+ph-(yv-minY)/(maxY-minY)*ph;
+      i===0?ctx.moveTo(px2,py2):ctx.lineTo(px2,py2);
+    });
+    ctx.stroke();
+    // Points
+    xd.forEach((xv,i)=>{
+      const px2=pad.l+(xv-minX)/(maxX-minX)*pw, py2=pad.t+ph-(yd[i]-minY)/(maxY-minY)*ph;
+      ctx.beginPath(); ctx.arc(px2,py2,4,0,Math.PI*2);
+      ctx.fillStyle=RAW[i][7]==='Fail'?'#c62828':'#1565c0'; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=0.8; ctx.stroke();
+    });
+    // R² label
+    const r2=0.963;
+    ctx.fillStyle='#333'; ctx.font='bold 10px IBM Plex Mono'; ctx.textAlign='left';
+    ctx.fillText(`R² = ${r2.toFixed(3)}`, pad.l+8, pad.t+16);
+    ctx.fillText(`Ŷ = ${b0.toFixed(2)} + ${b1.toFixed(4)}·X`, pad.l+8, pad.t+28);
+
+  } else if(type==='boxplot'){
+    axes('','Length (mm)','Boxplot: C1 Length');
+    const data=RAW.map(r=>r[0]).sort((a,b)=>a-b);
+    const s=stats(data);
+    const minY=s.min-0.5, maxY=s.max+0.5;
+    gridLines(5,null,null,minY,maxY);
+    const scale=y=>(pad.t+ph-(y-minY)/(maxY-minY)*ph);
+    const bx=pad.l+pw/2, bw2=50;
+    // Box
+    ctx.fillStyle='#bbdefb'; ctx.fillRect(bx-bw2,scale(s.q3),bw2*2,scale(s.q1)-scale(s.q3));
+    ctx.strokeStyle='#1565c0'; ctx.lineWidth=1.5;
+    ctx.strokeRect(bx-bw2,scale(s.q3),bw2*2,scale(s.q1)-scale(s.q3));
+    // Median
+    ctx.beginPath(); ctx.strokeStyle='#c62828'; ctx.lineWidth=2.5;
+    ctx.moveTo(bx-bw2,scale(s.median)); ctx.lineTo(bx+bw2,scale(s.median)); ctx.stroke();
+    // Whiskers
+    ctx.strokeStyle='#1565c0'; ctx.lineWidth=1.2;
+    [[s.min,s.q1],[s.max,s.q3]].forEach(([end,box])=>{
+      ctx.beginPath(); ctx.moveTo(bx,scale(box)); ctx.lineTo(bx,scale(end)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx-15,scale(end)); ctx.lineTo(bx+15,scale(end)); ctx.stroke();
+    });
+    // Mean diamond
+    ctx.beginPath(); ctx.fillStyle='#ff8f00';
+    ctx.moveTo(bx,scale(s.mean)-6); ctx.lineTo(bx+8,scale(s.mean)); ctx.lineTo(bx,scale(s.mean)+6); ctx.lineTo(bx-8,scale(s.mean)); ctx.closePath(); ctx.fill();
+    // Labels
+    ctx.fillStyle='#555'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='left';
+    [{l:'Max',v:s.max},{l:'Q3',v:s.q3},{l:'Med',v:s.median},{l:'Q1',v:s.q1},{l:'Min',v:s.min}].forEach(({l,v})=>{
+      ctx.fillText(`${l}: ${v.toFixed(2)}`, bx+bw2+8, scale(v)+3);
+    });
+
+  } else if(type==='control'){
+    axes('Observation','Length (mm)','I-MR Chart: C1 Length');
+    const data=RAW.map(r=>r[0]);
+    const s=stats(data);
+    const UCL=s.mean+3*s.sd, LCL=s.mean-3*s.sd;
+    const minY=LCL-0.2, maxY=UCL+0.2;
+    gridLines(4,null,null,minY,maxY);
+    const sc=y=>pad.t+ph-(y-minY)/(maxY-minY)*ph;
+    // Control limit lines
+    [[UCL,'#c62828','UCL'],[s.mean,'#00897b','CL'],[LCL,'#c62828','LCL']].forEach(([v,col,lbl])=>{
+      ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=v===s.mean?1.5:1;
+      ctx.setLineDash(v===s.mean?[]:[5,4]);
+      ctx.moveTo(pad.l,sc(v)); ctx.lineTo(pad.l+pw,sc(v)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=col; ctx.font='9px IBM Plex Mono'; ctx.textAlign='left';
+      ctx.fillText(`${lbl}=${v.toFixed(3)}`, pad.l+2, sc(v)-2);
+    });
+    // Line
+    ctx.beginPath(); ctx.strokeStyle='#1565c0'; ctx.lineWidth=1.5;
+    data.forEach((v,i)=>{
+      const px2=pad.l+i*(pw/(data.length-1)), py2=sc(v);
+      i===0?ctx.moveTo(px2,py2):ctx.lineTo(px2,py2);
+    });
+    ctx.stroke();
+    // Points
+    data.forEach((v,i)=>{
+      const px2=pad.l+i*(pw/(data.length-1)), py2=sc(v);
+      const oc=v>UCL||v<LCL;
+      ctx.beginPath(); ctx.arc(px2,py2,oc?5:3.5,0,Math.PI*2);
+      ctx.fillStyle=oc?'#c62828':'#1565c0'; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=0.8; ctx.stroke();
+      if(oc){ ctx.fillStyle='#c62828'; ctx.font='bold 9px IBM Plex Mono'; ctx.textAlign='center'; ctx.fillText('*',px2,py2-8); }
+      // X axis tick
+      ctx.fillStyle='#777'; ctx.font='8px IBM Plex Mono'; ctx.textAlign='center';
+      if(i%5===0) ctx.fillText(i+1, px2, pad.t+ph+12);
+    });
+
+  } else if(type==='capability'){
+    // Capability / normal distribution plot
+    axes('Length (mm)','Density','Process Capability: C1 Length');
+    const data=RAW.map(r=>r[0]);
+    const s=stats(data), LSL=74, USL=82;
+    const minX=LSL-1, maxX=USL+1;
+    const pdf=x=>Math.exp(-0.5*((x-s.mean)/s.sd)**2)/(s.sd*Math.sqrt(2*Math.PI));
+    let maxPdf=pdf(s.mean);
+    // Fill curve
+    ctx.beginPath();
+    const steps=200;
+    for(let i=0;i<=steps;i++){
+      const xv=minX+i*(maxX-minX)/steps;
+      const yv=pdf(xv)/maxPdf;
+      const px2=pad.l+(xv-minX)/(maxX-minX)*pw;
+      const py2=pad.t+ph-yv*ph*0.85;
+      i===0?ctx.moveTo(px2,pad.t+ph):ctx.lineTo(px2,py2);
+    }
+    ctx.lineTo(pad.l+pw,pad.t+ph); ctx.closePath();
+    ctx.fillStyle='rgba(58,127,213,0.15)'; ctx.fill();
+    // Curve
+    ctx.beginPath(); ctx.strokeStyle='#1565c0'; ctx.lineWidth=2.5;
+    for(let i=0;i<=steps;i++){
+      const xv=minX+i*(maxX-minX)/steps;
+      const yv=pdf(xv)/maxPdf;
+      const px2=pad.l+(xv-minX)/(maxX-minX)*pw;
+      const py2=pad.t+ph-yv*ph*0.85;
+      i===0?ctx.moveTo(px2,py2):ctx.lineTo(px2,py2);
+    }
+    ctx.stroke();
+    // LSL, USL, Mean lines
+    [[LSL,'#c62828','LSL'],[USL,'#c62828','USL'],[s.mean,'#00897b','X̄']].forEach(([xv,col,lbl])=>{
+      const px2=pad.l+(xv-minX)/(maxX-minX)*pw;
+      ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+      ctx.moveTo(px2,pad.t); ctx.lineTo(px2,pad.t+ph); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=col; ctx.font='bold 9px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText(lbl, px2, pad.t-2);
+    });
+    // X axis labels
+    for(let i=0;i<=6;i++){
+      const xv=minX+i*(maxX-minX)/6;
+      ctx.fillStyle='#777'; ctx.font='9px IBM Plex Mono'; ctx.textAlign='center';
+      ctx.fillText(xv.toFixed(1), pad.l+i*pw/6, pad.t+ph+13);
+    }
+    // Cp Cpk text
+    const cp=(USL-LSL)/(6*s.sd), cpk=Math.min((USL-s.mean)/(3*s.sd),(s.mean-LSL)/(3*s.sd));
+    ctx.fillStyle='#222'; ctx.font='bold 10px IBM Plex Mono'; ctx.textAlign='right';
+    ctx.fillText(`Cp = ${cp.toFixed(3)}   Cpk = ${cpk.toFixed(3)}`, pad.l+pw, pad.t+12);
+  }
+}
+
+// Welcome screen
+function drawWelcome(){
+  const cvs = document.getElementById('graph-welcome');
+  cvs.width = cvs.parentElement.clientWidth || 380;
+  cvs.height = cvs.parentElement.clientHeight || 200;
+  const ctx = cvs.getContext('2d'), W=cvs.width, H=cvs.height;
+  ctx.fillStyle='#f8faff'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#dce6f1';
+  for(let i=0;i<W;i+=24) for(let j=0;j<H;j+=24) ctx.fillRect(i,j,1,1);
+  ctx.fillStyle='#1565c0'; ctx.font='bold 16px IBM Plex Sans'; ctx.textAlign='center';
+  ctx.fillText('Graph Output Window', W/2, H/2-20);
+  ctx.fillStyle='#555'; ctx.font='12px IBM Plex Sans';
+  ctx.fillText('Use Graph menu or toolbar to create charts', W/2, H/2+4);
+  ctx.fillStyle='#888'; ctx.font='11px IBM Plex Mono';
+  ctx.fillText('Histogram · Scatter · Boxplot · Control Chart · Capability', W/2, H/2+24);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+buildWorksheet();
+setTimeout(drawWelcome, 100);
+
+// Resize handler
+window.addEventListener('resize', ()=>{
+  document.querySelectorAll('.graph-canvas').forEach(cvs=>{
+    cvs.width = cvs.parentElement.clientWidth;
+    cvs.height = cvs.parentElement.clientHeight;
+    const id = cvs.id.replace('graph-','');
+    const ctx = cvs.getContext('2d');
+    if(id==='welcome') drawWelcome();
+    else {
+      const type = id.replace(/\d+$/,'');
+      drawGraph(ctx, type, cvs.width, cvs.height);
+    }
+  });
+});
+</script>
+
+<script>
+// ── PWA SERVICE WORKER REGISTRATION ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('StatLab SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// ── INSTALL PROMPT (Android Chrome "Add to Home Screen") ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show the install banner
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'flex';
+});
+
+document.getElementById('install-btn')?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').style.display = 'none';
+  sessionPrint(`<br><span class="s-sig">✓ StatLab installed to home screen!</span><br><span class="s-prompt">MTB &gt;</span><br>`);
+});
+
+document.getElementById('install-dismiss')?.addEventListener('click', () => {
+  document.getElementById('install-banner').style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').style.display = 'none';
+});
+</script>
+</body>
+</html>
